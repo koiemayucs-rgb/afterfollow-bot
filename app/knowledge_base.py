@@ -4,6 +4,7 @@ from functools import lru_cache
 from app.config import CSV_PATH
 
 TXT_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "recolor_method.txt")
+SRANK_TXT_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "srank_mindset.txt")
 CLIENT_DATA_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "client_data.csv")
 
 
@@ -89,6 +90,11 @@ def load_knowledge_base() -> str:
     # ReColorメソッド（テキストファイル）
     if os.path.exists(TXT_PATH):
         with open(TXT_PATH, encoding="utf-8") as f:
+            parts.append(f.read())
+
+    # Sランク育成研修：マインド分析・インナーチャイルド理解
+    if os.path.exists(SRANK_TXT_PATH):
+        with open(SRANK_TXT_PATH, encoding="utf-8") as f:
             parts.append(f.read())
 
     # 生徒データ集計サマリー
