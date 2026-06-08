@@ -2,85 +2,276 @@ import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import streamlit as st
-from app.claude_client import draft_reply
+from app.claude_client import chat_reply
 
 st.set_page_config(
-    page_title="恋愛相談 返信ドラフト生成",
-    page_icon="💌",
-    layout="wide",
+    page_title="Recolor AI サポート",
+    page_icon="🌸",
+    layout="centered",
 )
 
-st.title("💌 恋愛相談 返信ドラフト生成ツール")
-st.caption("クライアントの相談文を貼り付けて、AIが返信の下書きを生成します。")
+# ─── スタイル ───────────────────────────────────────────────
+st.markdown("""
+<style>
+/* ページ背景 */
+[data-testid="stAppViewContainer"] {
+    background: linear-gradient(160deg, #fff0f4 0%, #fde8f0 100%);
+    min-height: 100vh;
+}
+[data-testid="stHeader"] { background: transparent; }
 
-st.divider()
+/* ヘッダー */
+.chat-header {
+    background: linear-gradient(135deg, #d63d6e 0%, #e8547a 60%, #f07095 100%);
+    border-radius: 20px 20px 0 0;
+    padding: 18px 20px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 0;
+    box-shadow: 0 4px 16px rgba(214,61,110,0.25);
+}
+.header-icon {
+    font-size: 36px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    width: 52px; height: 52px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.header-title {
+    color: white;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+.header-subtitle {
+    color: rgba(255,255,255,0.85);
+    font-size: 12px;
+    margin-top: 2px;
+}
+.online-dot {
+    width: 10px; height: 10px;
+    background: #7effb2;
+    border-radius: 50%;
+    border: 2px solid white;
+    margin-left: auto;
+    flex-shrink: 0;
+}
 
-col_input, col_output = st.columns(2)
+/* チャットエリア全体 */
+.chat-body {
+    background: white;
+    border-radius: 0 0 20px 20px;
+    padding: 20px 16px 10px;
+    min-height: 380px;
+    box-shadow: 0 4px 24px rgba(214,61,110,0.10);
+}
 
-with col_input:
-    st.subheader("📨 クライアントからの相談文")
-    consultation = st.text_area(
-        label="相談内容",
-        height=420,
-        placeholder="例：最近、マッチングアプリで気になる方がいて、メッセージのやり取りは続いているのですが...",
-        label_visibility="collapsed",
+/* AIメッセージバブル */
+.msg-row-ai {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+.ai-avatar {
+    font-size: 20px;
+    background: linear-gradient(135deg, #f9d0dc, #f5b8ca);
+    border-radius: 50%;
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(214,61,110,0.15);
+}
+.bubble-ai {
+    background: linear-gradient(135deg, #fff0f4, #fde4ec);
+    border: 1px solid #f5c6d8;
+    border-radius: 18px 18px 18px 4px;
+    padding: 12px 16px;
+    max-width: 78%;
+    color: #7a2040;
+    font-size: 14px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    box-shadow: 0 2px 8px rgba(214,61,110,0.08);
+}
+
+/* ユーザーメッセージバブル */
+.msg-row-user {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 16px;
+}
+.bubble-user {
+    background: linear-gradient(135deg, #e8547a, #d63d6e);
+    border-radius: 18px 18px 4px 18px;
+    padding: 12px 16px;
+    max-width: 78%;
+    color: white;
+    font-size: 14px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    box-shadow: 0 2px 10px rgba(214,61,110,0.30);
+}
+
+/* 日付ラベル */
+.date-label {
+    text-align: center;
+    color: #c4a0b0;
+    font-size: 11px;
+    margin: 4px 0 18px;
+    letter-spacing: 0.05em;
+}
+
+/* クイックチップボタン */
+.stButton > button {
+    background: white !important;
+    border: 1.5px solid #f0a8c0 !important;
+    border-radius: 20px !important;
+    color: #c04070 !important;
+    font-size: 12px !important;
+    padding: 6px 12px !important;
+    font-weight: 500 !important;
+    transition: all 0.2s ease !important;
+    white-space: nowrap !important;
+    width: 100% !important;
+}
+.stButton > button:hover {
+    background: #fde8f0 !important;
+    border-color: #d63d6e !important;
+    color: #d63d6e !important;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(214,61,110,0.15) !important;
+}
+
+/* チャット入力欄 */
+[data-testid="stChatInput"] > div {
+    border: 1.5px solid #f0a8c0 !important;
+    border-radius: 24px !important;
+    background: white !important;
+    box-shadow: 0 2px 10px rgba(214,61,110,0.10) !important;
+}
+
+/* メインコンテンツの幅調整 */
+.block-container {
+    max-width: 520px !important;
+    padding-top: 1.5rem !important;
+    padding-bottom: 1rem !important;
+}
+
+/* Streamlitデフォルトのチャットバブルを非表示 */
+[data-testid="stChatMessage"] {
+    display: none !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
+
+# ─── 定数 ─────────────────────────────────────────────────
+GREETING = (
+    "こんにちは😊 リカラーAIサポートです。\n\n"
+    "卒業後のお付き合いで、うれしいことも、ちょっとモヤっとすることも、"
+    "どんなことでも気軽に話しかけてみてください。一緒に考えさせていただきますね💕"
+)
+
+QUICK_CHIPS = [
+    ("🌙 返信が遅くて不安", "返信が遅くて不安です。どうしたらいいですか？"),
+    ("📅 会う頻度が減った", "最近会う頻度が減ってきていて心配です"),
+    ("💍 結婚を迷っている", "結婚のことで迷っていて、気持ちを整理したいです"),
+    ("😶 気持ちが言えない", "自分の気持ちをうまく伝えられなくて困っています"),
+]
+
+TODAY = "今日"
+
+
+# ─── セッション初期化 ────────────────────────────────────────
+if "messages" not in st.session_state:
+    st.session_state.messages = []          # API送信用（挨拶は含まない）
+if "display_messages" not in st.session_state:
+    st.session_state.display_messages = [   # 表示用（挨拶含む）
+        {"role": "assistant", "content": GREETING}
+    ]
+if "pending_user_input" not in st.session_state:
+    st.session_state.pending_user_input = None
+
+
+# ─── ヘッダー ─────────────────────────────────────────────
+st.markdown("""
+<div class="chat-header">
+    <div class="header-icon">🌸</div>
+    <div>
+        <div class="header-title">Recolor AI サポート</div>
+        <div class="header-subtitle">卒業後もあなたの恋愛に寄り添います</div>
+    </div>
+    <div class="online-dot"></div>
+</div>
+""", unsafe_allow_html=True)
+
+
+# ─── チャット本体（HTMLで描画）────────────────────────────────
+chat_html = ['<div class="chat-body">']
+chat_html.append(f'<div class="date-label">{TODAY}</div>')
+
+for msg in st.session_state.display_messages:
+    content_escaped = (
+        msg["content"]
+        .replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
     )
-    generate_btn = st.button(
-        "✨ 返信ドラフトを生成",
-        type="primary",
-        disabled=not consultation.strip(),
-        use_container_width=True,
-    )
-
-with col_output:
-    st.subheader("📝 返信ドラフト")
-
-    if "draft" not in st.session_state:
-        st.session_state.draft = ""
-    if "usage" not in st.session_state:
-        st.session_state.usage = None
-
-    if generate_btn and consultation.strip():
-        with st.spinner("生成中..."):
-            try:
-                draft, usage = draft_reply(consultation)
-                st.session_state.draft = draft
-                st.session_state.usage = usage
-            except Exception as e:
-                st.error(f"エラーが発生しました: {e}")
-
-    if st.session_state.draft:
-        st.text_area(
-            label="ドラフト",
-            value=st.session_state.draft,
-            height=420,
-            label_visibility="collapsed",
-        )
-        st.caption("上のテキストを編集してからSlackに貼り付けてください。")
-
-        if st.session_state.usage:
-            usage = st.session_state.usage
-            with st.expander("📊 トークン使用状況（コスト管理用）"):
-                c1, c2, c3, c4 = st.columns(4)
-                c1.metric("入力", usage["input_tokens"])
-                c2.metric("出力", usage["output_tokens"])
-                c3.metric("キャッシュ作成", usage["cache_creation_tokens"])
-                c4.metric("キャッシュ読み取り", usage["cache_read_tokens"])
-                if usage["cache_read_tokens"] > 0:
-                    st.success("✅ ナレッジベースがキャッシュから読み込まれました（コスト節約）")
-                else:
-                    st.info("ℹ️ 初回リクエスト：ナレッジベースをキャッシュしました")
+    if msg["role"] == "assistant":
+        chat_html.append(f"""
+<div class="msg-row-ai">
+    <div class="ai-avatar">🌸</div>
+    <div class="bubble-ai">{content_escaped}</div>
+</div>""")
     else:
-        st.markdown(
-            """
-            <div style='height:420px; display:flex; align-items:center;
-                        justify-content:center; color:#aaa; border:1px dashed #ddd;
-                        border-radius:8px; font-size:14px;'>
-                ← 相談文を入力して「返信ドラフトを生成」を押してください
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        chat_html.append(f"""
+<div class="msg-row-user">
+    <div class="bubble-user">{content_escaped}</div>
+</div>""")
 
-st.divider()
-st.caption("⚠️ 生成されたドラフトは必ず内容を確認・編集してから送信してください。")
+chat_html.append("</div>")
+st.markdown("\n".join(chat_html), unsafe_allow_html=True)
+
+
+# ─── クイックチップ（最初のユーザー発言前のみ表示）──────────────
+user_spoke = any(m["role"] == "user" for m in st.session_state.display_messages)
+if not user_spoke:
+    col1, col2 = st.columns(2)
+    for i, (label, msg_text) in enumerate(QUICK_CHIPS):
+        col = col1 if i % 2 == 0 else col2
+        if col.button(label, key=f"chip_{i}"):
+            st.session_state.pending_user_input = msg_text
+            st.rerun()
+
+
+# ─── メッセージ処理 ────────────────────────────────────────
+def process_user_message(user_text: str):
+    st.session_state.display_messages.append({"role": "user", "content": user_text})
+    st.session_state.messages.append({"role": "user", "content": user_text})
+
+    try:
+        reply, _ = chat_reply(st.session_state.messages)
+    except Exception as e:
+        reply = f"申し訳ありません、エラーが発生しました。もう一度お試しください。\n（{e}）"
+
+    st.session_state.display_messages.append({"role": "assistant", "content": reply})
+    st.session_state.messages.append({"role": "assistant", "content": reply})
+
+
+# チップクリックの処理
+if st.session_state.pending_user_input:
+    with st.spinner(""):
+        process_user_message(st.session_state.pending_user_input)
+    st.session_state.pending_user_input = None
+    st.rerun()
+
+
+# ─── テキスト入力 ──────────────────────────────────────────
+user_input = st.chat_input("気になることを話してみてください…")
+if user_input and user_input.strip():
+    with st.spinner(""):
+        process_user_message(user_input.strip())
+    st.rerun()
