@@ -185,6 +185,9 @@ QUICK_CHIPS = [
 TODAY = "今日"
 
 
+# ─── 定数（レート制限） ─────────────────────────────────────
+MAX_MESSAGES_PER_SESSION = 20  # 1セッションあたりの最大ユーザー送信数
+
 # ─── セッション初期化 ────────────────────────────────────────
 if "messages" not in st.session_state:
     st.session_state.messages = []          # API送信用（挨拶は含まない）
@@ -194,6 +197,8 @@ if "display_messages" not in st.session_state:
     ]
 if "pending_user_input" not in st.session_state:
     st.session_state.pending_user_input = None
+if "user_message_count" not in st.session_state:
+    st.session_state.user_message_count = 0
 
 
 # ─── ヘッダー ─────────────────────────────────────────────
@@ -247,10 +252,16 @@ if not user_spoke:
             st.rerun()
 
 
+# ─── レート制限チェック ────────────────────────────────────
+def is_rate_limited() -> bool:
+    return st.session_state.user_message_count >= MAX_MESSAGES_PER_SESSION
+
+
 # ─── メッセージ処理 ────────────────────────────────────────
 def process_user_message(user_text: str):
     st.session_state.display_messages.append({"role": "user", "content": user_text})
     st.session_state.messages.append({"role": "user", "content": user_text})
+    st.session_state.user_message_count += 1
 
     try:
         reply, _ = chat_reply(st.session_state.messages)
@@ -263,18 +274,29 @@ def process_user_message(user_text: str):
 
 # チップクリックの処理
 if st.session_state.pending_user_input:
-    with st.spinner(""):
-        process_user_message(st.session_state.pending_user_input)
+    if not is_rate_limited():
+        with st.spinner(""):
+            process_user_message(st.session_state.pending_user_input)
     st.session_state.pending_user_input = None
     st.rerun()
 
 
 # ─── テキスト入力 ──────────────────────────────────────────
-user_input = st.chat_input("気になることを話してみてください…")
-if user_input and user_input.strip():
-    with st.spinner(""):
-        process_user_message(user_input.strip())
-    st.rerun()
+if is_rate_limited():
+    st.markdown("""
+    <div style='text-align:center; padding:16px; background:#fff0f4;
+                border:1px solid #f5c6d8; border-radius:12px;
+                color:#7a2040; font-size:13px; margin-top:8px;'>
+        💬 1回のセッションでお話しできるメッセージ数の上限に達しました。<br>
+        続きは画面を更新してからまた話しかけてください🌸
+    </div>
+    """, unsafe_allow_html=True)
+else:
+    user_input = st.chat_input("気になることを話してみてください…")
+    if user_input and user_input.strip():
+        with st.spinner(""):
+            process_user_message(user_input.strip())
+        st.rerun()
 
 # ─── フッター ──────────────────────────────────────────────
 st.markdown("""
