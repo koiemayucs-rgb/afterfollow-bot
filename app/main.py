@@ -10,6 +10,77 @@ st.set_page_config(
     layout="centered",
 )
 
+# ─── 認証ゲート ────────────────────────────────────────────
+if not st.user.is_logged_in:
+    st.markdown("""
+    <style>
+    [data-testid="stAppViewContainer"] {
+        background: linear-gradient(160deg, #fff0f4 0%, #fde8f0 100%);
+        min-height: 100vh;
+    }
+    [data-testid="stHeader"] { background: transparent; }
+    .block-container { max-width: 480px !important; padding-top: 4rem !important; }
+    .login-card {
+        background: white;
+        border-radius: 24px;
+        padding: 40px 32px 32px;
+        box-shadow: 0 8px 32px rgba(214,61,110,0.15);
+        text-align: center;
+    }
+    .login-icon { font-size: 64px; margin-bottom: 12px; }
+    .login-title {
+        color: #d63d6e;
+        font-size: 22px;
+        font-weight: 700;
+        margin-bottom: 6px;
+    }
+    .login-sub {
+        color: #9a6070;
+        font-size: 13px;
+        line-height: 1.7;
+        margin-bottom: 28px;
+    }
+    .stButton > button {
+        background: linear-gradient(135deg, #d63d6e, #e8547a) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 24px !important;
+        font-size: 15px !important;
+        font-weight: 600 !important;
+        padding: 12px 24px !important;
+        width: 100% !important;
+        box-shadow: 0 4px 14px rgba(214,61,110,0.35) !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
+    <div class="login-card">
+        <div class="login-icon">🌸</div>
+        <div class="login-title">Recolor AI サポート</div>
+        <div class="login-sub">
+            卒業後のお付き合いに寄り添う、<br>
+            リカラー専用の AI 相談チャットです。<br><br>
+            Googleアカウントでログインしてご利用ください。
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.write("")
+    col1, col2, col3 = st.columns([1, 4, 1])
+    with col2:
+        if st.button("🔑 Googleアカウントでログイン", use_container_width=True):
+            st.login("google")
+
+    st.markdown("""
+    <div style='text-align:center; margin-top:24px; font-size:11px; color:#c4a0b0;'>
+        © 2026 リカラー株式会社 ｜
+        <a href='/プライバシーポリシー' target='_self' style='color:#c4a0b0;'>プライバシーポリシー</a> ｜
+        <a href='/利用規約' target='_self' style='color:#c4a0b0;'>利用規約</a>
+    </div>
+    """, unsafe_allow_html=True)
+    st.stop()
+
 # ─── スタイル ───────────────────────────────────────────────
 st.markdown("""
 <style>
@@ -200,6 +271,16 @@ if "pending_user_input" not in st.session_state:
 if "user_message_count" not in st.session_state:
     st.session_state.user_message_count = 0
 
+
+# ─── ユーザーバー（ログアウト） ──────────────────────────────
+_user_name = st.user.name or st.user.email or "ゲスト"
+_col_name, _col_logout = st.columns([4, 1])
+_col_name.markdown(
+    f"<div style='font-size:12px; color:#c4a0b0; padding-top:6px;'>👤 {_user_name}</div>",
+    unsafe_allow_html=True,
+)
+if _col_logout.button("ログアウト", key="_logout"):
+    st.logout()
 
 # ─── ヘッダー ─────────────────────────────────────────────
 st.markdown("""
