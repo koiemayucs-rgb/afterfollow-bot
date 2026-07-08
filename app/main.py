@@ -3,6 +3,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import streamlit as st
 from app.claude_client import chat_reply
+from app.db import load_history, save_message
 
 st.set_page_config(
     page_title="Recolor AI サポート",
@@ -259,13 +260,21 @@ TODAY = "今日"
 # ─── 定数（レート制限） ─────────────────────────────────────
 MAX_MESSAGES_PER_SESSION = 20  # 1セッションあたりの最大ユーザー送信数
 
-# ─── セッション初期化 ────────────────────────────────────────
-if "messages" not in st.session_state:
-    st.session_state.messages = []          # API送信用（挨拶は含まない）
-if "display_messages" not in st.session_state:
-    st.session_state.display_messages = [   # 表示用（挨拶含む）
-        {"role": "assistant", "content": GREETING}
-    ]
+# ─── セッション初期化（過去履歴をロード）────────────────────────
+_user_email = st.user.email or ""
+
+if "history_loaded" not in st.session_state:
+    past = load_history(_user_email)
+    st.session_state.messages = past                   # API送信用
+    # 表示用：過去履歴があれば冒頭に挨拶は入れない
+    if past:
+        st.session_state.display_messages = list(past)
+    else:
+        st.session_state.display_messages = [
+            {"role": "assistant", "content": GREETING}
+        ]
+    st.session_state.history_loaded = True
+
 if "pending_user_input" not in st.session_state:
     st.session_state.pending_user_input = None
 if "user_message_count" not in st.session_state:
@@ -343,6 +352,7 @@ def process_user_message(user_text: str):
     st.session_state.display_messages.append({"role": "user", "content": user_text})
     st.session_state.messages.append({"role": "user", "content": user_text})
     st.session_state.user_message_count += 1
+    save_message(_user_email, "user", user_text)
 
     try:
         reply, _ = chat_reply(st.session_state.messages)
@@ -351,6 +361,7 @@ def process_user_message(user_text: str):
 
     st.session_state.display_messages.append({"role": "assistant", "content": reply})
     st.session_state.messages.append({"role": "assistant", "content": reply})
+    save_message(_user_email, "assistant", reply)
 
 
 # チップクリックの処理
