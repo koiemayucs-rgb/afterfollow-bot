@@ -75,7 +75,7 @@ if not st.user.is_logged_in:
 
     st.markdown("""
     <div style='text-align:center; margin-top:24px; font-size:11px; color:#c4a0b0;'>
-        © 2026 リカラー株式会社 ｜
+        © 2026 株式会社リカラー ｜
         <a href='/プライバシーポリシー' target='_self' style='color:#c4a0b0;'>プライバシーポリシー</a> ｜
         <a href='/利用規約' target='_self' style='color:#c4a0b0;'>利用規約</a>
     </div>
@@ -393,7 +393,7 @@ else:
 # ─── フッター ──────────────────────────────────────────────
 st.markdown("""
 <div style='text-align:center; margin-top:16px; font-size:11px; color:#c4a0b0;'>
-    © 2026 リカラー株式会社 ｜
+    © 2026 株式会社リカラー ｜
     <a href='/プライバシーポリシー' target='_self' style='color:#c4a0b0;'>プライバシーポリシー</a> ｜
     <a href='/利用規約' target='_self' style='color:#c4a0b0;'>利用規約・特定商取引法に基づく表示</a>
 </div>
