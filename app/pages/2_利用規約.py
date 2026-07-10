@@ -3,7 +3,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 
 import streamlit as st
 
-st.set_page_config(page_title="利用規約 | Recolor AIサポート", page_icon="🌸")
+st.set_page_config(page_title="利用規約 | ReColor AIサポート", page_icon="🌸")
 
 st.markdown("""
 <style>
@@ -17,7 +17,7 @@ st.title("📋 利用規約")
 st.caption("最終更新日：2026年7月1日")
 
 st.markdown("""
-本利用規約（以下「本規約」）は、リカラー株式会社（以下「当社」）が提供する Recolor AIサポート（以下「本サービス」）の利用条件を定めるものです。本サービスをご利用いただく前に、本規約をよくお読みください。
+本利用規約（以下「本規約」）は、リカラー株式会社（以下「当社」）が提供する ReColor AIサポート（以下「本サービス」）の利用条件を定めるものです。本サービスをご利用いただく前に、本規約をよくお読みください。
 
 ---
 
@@ -98,7 +98,7 @@ st.markdown("""
 | 所在地 | お問い合わせにより開示いたします |
 | 電話番号 | お問い合わせにより開示いたします |
 | メールアドレス | info@recolor-inc.net |
-| サービス名 | Recolor AIサポート |
+| サービス名 | ReColor AIサポート |
 | サービスの内容 | リカラー卒業生向け AI 恋愛相談チャットボット |
 | 利用料金 | 無料（現時点） |
 | 支払方法 | 該当なし（無料サービス） |

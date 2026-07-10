@@ -3,7 +3,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 
 import streamlit as st
 
-st.set_page_config(page_title="プライバシーポリシー | Recolor AIサポート", page_icon="🌸")
+st.set_page_config(page_title="プライバシーポリシー | ReColor AIサポート", page_icon="🌸")
 
 st.markdown("""
 <style>
@@ -17,7 +17,7 @@ st.title("🌸 プライバシーポリシー")
 st.caption("最終更新日：2026年7月1日")
 
 st.markdown("""
-リカラー株式会社（以下「当社」）は、Recolor AIサポート（以下「本サービス」）における利用者の個人情報の取り扱いについて、以下のとおりプライバシーポリシーを定めます。
+リカラー株式会社（以下「当社」）は、ReColor AIサポート（以下「本サービス」）における利用者の個人情報の取り扱いについて、以下のとおりプライバシーポリシーを定めます。
 
 ---
 

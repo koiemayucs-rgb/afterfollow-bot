@@ -6,7 +6,7 @@ from app.claude_client import chat_reply
 from app.db import load_history, save_message
 
 st.set_page_config(
-    page_title="Recolor AI サポート",
+    page_title="ReColor AI サポート",
     page_icon="🌸",
     layout="centered",
 )
@@ -58,7 +58,7 @@ if not st.user.is_logged_in:
     st.markdown("""
     <div class="login-card">
         <div class="login-icon">🌸</div>
-        <div class="login-title">Recolor AI サポート</div>
+        <div class="login-title">ReColor AI サポート</div>
         <div class="login-sub">
             卒業後のお付き合いに寄り添う、<br>
             リカラー専用の AI 相談チャットです。<br><br>
@@ -296,7 +296,7 @@ st.markdown("""
 <div class="chat-header">
     <div class="header-icon">🌸</div>
     <div>
-        <div class="header-title">Recolor AI サポート</div>
+        <div class="header-title">ReColor AI サポート</div>
         <div class="header-subtitle">卒業後もあなたの恋愛に寄り添います</div>
     </div>
     <div class="online-dot"></div>

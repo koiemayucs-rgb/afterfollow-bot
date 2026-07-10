@@ -1,4 +1,4 @@
-# Recolor AIサポート インシデント対応フロー
+# ReColor AIサポート インシデント対応フロー
 
 最終更新日：2026-07-01  
 担当：小家 真由（koie.mayu_cs@recolor-inc.net）
