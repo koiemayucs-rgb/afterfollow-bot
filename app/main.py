@@ -116,13 +116,13 @@ if not st.session_state.consent_verified:
         line-height: 1.8;
     }
     .consent-warn {
-        background: #fff8f0;
-        border-left: 3px solid #e89040;
+        background: #f0f6ff;
+        border-left: 3px solid #6090d0;
         padding: 10px 14px;
         border-radius: 4px;
         margin: 14px 0;
         font-size: 12.5px;
-        color: #7a4010;
+        color: #304060;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -131,21 +131,22 @@ if not st.session_state.consent_verified:
     <div class="consent-card">
         <div class="consent-title">🌸 ご利用前にご確認ください</div>
         <div class="consent-body">
-            本サービスをご利用いただくにあたり、以下の外国にある事業者へ個人情報を提供します。
+            本サービスは、以下の米国にある事業者と連携してサービスを提供しています。
             <br><br>
             <b>・Anthropic, Inc.（米国）</b><br>
-            　AIによる返答生成のため、会話テキストを送信します。<br><br>
+            　会話テキストをもとに、AIが返答を生成します。<br>
+            　取得したデータはモデルの学習には使用されません。<br><br>
             <b>・Supabase, Inc.（米国）</b><br>
-            　会話履歴の保存のため、メールアドレスおよび会話テキストを送信します。<br>
-            　なお、データの保存先は東京リージョン（日本国内）です。
+            　会話履歴を安全に保存・管理します。<br>
+            　データの保存先は東京リージョン（日本国内）です。
         </div>
     </div>
     """, unsafe_allow_html=True)
 
     st.markdown("""
     <div class="consent-warn">
-        ⚠️ 米国には日本の個人情報保護法に相当する包括的な連邦法がなく、日本と同等の保護措置が取られない場合があります。詳しくは下記「外国にある事業者への情報の提供について」をご確認ください。<br><br>
-        また、会話内容に要配慮個人情報（健康・病歴・性的指向等）を含む場合は、特にご注意ください。
+        ℹ️ Anthropic・Supabase はいずれも米国の企業です。米国には日本の個人情報保護法に相当する包括的な連邦法がないため、データの取り扱いが日本と異なる場合があります。詳細は「外国にある事業者への情報の提供について」をご確認いただけます。<br><br>
+        健康状態・病歴・性的指向などセンシティブな情報を入力する際は、ご留意ください。
     </div>
     """, unsafe_allow_html=True)
 
