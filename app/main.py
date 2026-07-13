@@ -490,8 +490,14 @@ pg = st.navigation(
         st.Page(
             "pages/_外国にある事業者への情報の提供について.py",
             title="外国にある事業者への情報の提供について",
-            hidden=True,
         ),
-    ]
+    ],
+    position="hidden",  # 自動生成ナビを非表示にして手動で制御
 )
+
+# サイドバーに表示したい3ページだけを手動で追加
+st.sidebar.page_link("pages/1_プライバシーポリシー.py", label="プライバシーポリシー")
+st.sidebar.page_link("pages/2_利用規約.py", label="利用規約")
+st.sidebar.page_link("pages/3_特定商取引法に基づく表示.py", label="特定商取引法に基づく表示")
+
 pg.run()
