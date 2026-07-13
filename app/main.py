@@ -11,188 +11,205 @@ st.set_page_config(
     layout="centered",
 )
 
-# ─── 認証ゲート ────────────────────────────────────────────
-if not st.user.is_logged_in:
-    st.markdown("""
-    <style>
-    [data-testid="stAppViewContainer"] {
-        background: linear-gradient(160deg, #fff0f4 0%, #fde8f0 100%);
-        min-height: 100vh;
-    }
-    [data-testid="stHeader"] { background: transparent; }
-    .block-container { max-width: 480px !important; padding-top: 4rem !important; }
-    .login-card {
-        background: white;
-        border-radius: 24px;
-        padding: 40px 32px 32px;
-        box-shadow: 0 8px 32px rgba(214,61,110,0.15);
-        text-align: center;
-    }
-    .login-icon { font-size: 64px; margin-bottom: 12px; }
-    .login-title {
-        color: #d63d6e;
-        font-size: 22px;
-        font-weight: 700;
-        margin-bottom: 6px;
-    }
-    .login-sub {
-        color: #9a6070;
-        font-size: 13px;
-        line-height: 1.7;
-        margin-bottom: 28px;
-    }
-    .stButton > button {
-        background: linear-gradient(135deg, #d63d6e, #e8547a) !important;
-        color: white !important;
-        border: none !important;
-        border-radius: 24px !important;
-        font-size: 15px !important;
-        font-weight: 600 !important;
-        padding: 12px 24px !important;
-        width: 100% !important;
-        box-shadow: 0 4px 14px rgba(214,61,110,0.35) !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
 
-    st.markdown("""
-    <div class="login-card">
-        <div class="login-icon">🌸</div>
-        <div class="login-title">ReColor AI サポート</div>
-        <div class="login-sub">
-            卒業後のお付き合いに寄り添う、<br>
-            リカラー専用の AI 相談チャットです。<br><br>
-            Googleアカウントでログインしてご利用ください。
+def _chat_page():
+    MAX_MESSAGES_PER_SESSION = 20
+
+    GREETING = (
+        "こんにちは😊 リカラーAIサポートです。\n\n"
+        "卒業後のお付き合いで、うれしいことも、ちょっとモヤっとすることも、"
+        "どんなことでも気軽に話しかけてみてください。一緒に考えさせていただきますね💕"
+    )
+
+    QUICK_CHIPS = [
+        ("🌙 返信が遅くて不安", "返信が遅くて不安です。どうしたらいいですか？"),
+        ("📅 会う頻度が減った", "最近会う頻度が減ってきていて心配です"),
+        ("💍 結婚を迷っている", "結婚のことで迷っていて、気持ちを整理したいです"),
+        ("😶 気持ちが言えない", "自分の気持ちをうまく伝えられなくて困っています"),
+    ]
+
+    TODAY = "今日"
+
+    # ─── 認証ゲート ────────────────────────────────────────────
+    if not st.user.is_logged_in:
+        st.markdown("""
+        <style>
+        [data-testid="stAppViewContainer"] {
+            background: linear-gradient(160deg, #fff0f4 0%, #fde8f0 100%);
+            min-height: 100vh;
+        }
+        [data-testid="stHeader"] { background: transparent; }
+        .block-container { max-width: 480px !important; padding-top: 4rem !important; }
+        .login-card {
+            background: white;
+            border-radius: 24px;
+            padding: 40px 32px 32px;
+            box-shadow: 0 8px 32px rgba(214,61,110,0.15);
+            text-align: center;
+        }
+        .login-icon { font-size: 64px; margin-bottom: 12px; }
+        .login-title {
+            color: #d63d6e;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .login-sub {
+            color: #9a6070;
+            font-size: 13px;
+            line-height: 1.7;
+            margin-bottom: 28px;
+        }
+        .stButton > button {
+            background: linear-gradient(135deg, #d63d6e, #e8547a) !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 24px !important;
+            font-size: 15px !important;
+            font-weight: 600 !important;
+            padding: 12px 24px !important;
+            width: 100% !important;
+            box-shadow: 0 4px 14px rgba(214,61,110,0.35) !important;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+
+        st.markdown("""
+        <div class="login-card">
+            <div class="login-icon">🌸</div>
+            <div class="login-title">ReColor AI サポート</div>
+            <div class="login-sub">
+                卒業後のお付き合いに寄り添う、<br>
+                リカラー専用の AI 相談チャットです。<br><br>
+                Googleアカウントでログインしてご利用ください。
+            </div>
         </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 
-    st.write("")
-    col1, col2, col3 = st.columns([1, 4, 1])
-    with col2:
-        if st.button("🔑 Googleアカウントでログイン", use_container_width=True):
-            st.login("google")
+        st.write("")
+        col1, col2, col3 = st.columns([1, 4, 1])
+        with col2:
+            if st.button("🔑 Googleアカウントでログイン", use_container_width=True):
+                st.login("google")
 
-    st.markdown("""
-    <div style='text-align:center; margin-top:24px; font-size:11px; color:#c4a0b0;'>
-        © 2026 株式会社リカラー ｜
-        <a href='/プライバシーポリシー' target='_self' style='color:#c4a0b0;'>プライバシーポリシー</a> ｜
-        <a href='/利用規約' target='_self' style='color:#c4a0b0;'>利用規約</a>
-    </div>
-    """, unsafe_allow_html=True)
-    st.stop()
-
-# ─── 同意ゲート ────────────────────────────────────────────
-_user_email_early = st.user.email or ""
-
-if "consent_verified" not in st.session_state:
-    st.session_state.consent_verified = has_consented(_user_email_early, CONSENT_VERSION)
-
-if not st.session_state.consent_verified:
-    st.markdown("""
-    <style>
-    [data-testid="stAppViewContainer"] {
-        background: linear-gradient(160deg, #fff0f4 0%, #fde8f0 100%);
-        min-height: 100vh;
-    }
-    [data-testid="stHeader"] { background: transparent; }
-    .block-container { max-width: 640px !important; padding-top: 2.5rem !important; }
-    .consent-card {
-        background: white;
-        border-radius: 20px;
-        padding: 32px 28px 24px;
-        box-shadow: 0 8px 32px rgba(214,61,110,0.15);
-    }
-    .consent-title {
-        color: #d63d6e;
-        font-size: 18px;
-        font-weight: 700;
-        margin-bottom: 16px;
-        text-align: center;
-    }
-    .consent-body {
-        color: #5a3040;
-        font-size: 13.5px;
-        line-height: 1.8;
-    }
-    .consent-warn {
-        background: #f0f6ff;
-        border-left: 3px solid #6090d0;
-        padding: 10px 14px;
-        border-radius: 4px;
-        margin: 14px 0;
-        font-size: 12.5px;
-        color: #304060;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
-    st.markdown("""
-    <div class="consent-card">
-        <div class="consent-title">🌸 ご利用前にご確認ください</div>
-        <div class="consent-body">
-            本サービスは、以下の米国にある事業者と連携してサービスを提供しています。
-            <br><br>
-            <b>・Anthropic, Inc.（米国）</b><br>
-            　会話テキストをもとに、AIが返答を生成します。<br>
-            　取得したデータはモデルの学習には使用されません。<br><br>
-            <b>・Supabase, Inc.（米国）</b><br>
-            　会話履歴を安全に保存・管理します。<br>
-            　データの保存先は東京リージョン（日本国内）です。
+        st.markdown("""
+        <div style='text-align:center; margin-top:24px; font-size:11px; color:#c4a0b0;'>
+            © 2026 株式会社リカラー ｜
+            <a href='/プライバシーポリシー' target='_self' style='color:#c4a0b0;'>プライバシーポリシー</a> ｜
+            <a href='/利用規約' target='_self' style='color:#c4a0b0;'>利用規約</a>
         </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
+        st.stop()
 
+    # ─── 同意ゲート ────────────────────────────────────────────
+    _user_email_early = st.user.email or ""
+
+    if "consent_verified" not in st.session_state:
+        st.session_state.consent_verified = has_consented(_user_email_early, CONSENT_VERSION)
+
+    if not st.session_state.consent_verified:
+        st.markdown("""
+        <style>
+        [data-testid="stAppViewContainer"] {
+            background: linear-gradient(160deg, #fff0f4 0%, #fde8f0 100%);
+            min-height: 100vh;
+        }
+        [data-testid="stHeader"] { background: transparent; }
+        .block-container { max-width: 640px !important; padding-top: 2.5rem !important; }
+        .consent-card {
+            background: white;
+            border-radius: 20px;
+            padding: 32px 28px 24px;
+            box-shadow: 0 8px 32px rgba(214,61,110,0.15);
+        }
+        .consent-title {
+            color: #d63d6e;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        .consent-body {
+            color: #5a3040;
+            font-size: 13.5px;
+            line-height: 1.8;
+        }
+        .consent-warn {
+            background: #f0f6ff;
+            border-left: 3px solid #6090d0;
+            padding: 10px 14px;
+            border-radius: 4px;
+            margin: 14px 0;
+            font-size: 12.5px;
+            color: #304060;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+
+        st.markdown("""
+        <div class="consent-card">
+            <div class="consent-title">🌸 ご利用前にご確認ください</div>
+            <div class="consent-body">
+                本サービスは、以下の米国にある事業者と連携してサービスを提供しています。
+                <br><br>
+                <b>・Anthropic, Inc.（米国）</b><br>
+                　会話テキストをもとに、AIが返答を生成します。<br>
+                　取得したデータはモデルの学習には使用されません。<br><br>
+                <b>・Supabase, Inc.（米国）</b><br>
+                　会話履歴を安全に保存・管理します。<br>
+                　データの保存先は東京リージョン（日本国内）です。
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("""
+        <div class="consent-warn">
+            ℹ️ Anthropic・Supabase はいずれも米国の企業です。米国には日本の個人情報保護法に相当する包括的な連邦法がないため、データの取り扱いが日本と異なる場合があります。詳細は「外国にある事業者への情報の提供について」をご確認いただけます。<br><br>
+            健康状態・病歴・性的指向などセンシティブな情報を入力する際は、ご留意ください。
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown(
+            "詳細：[外国にある事業者への情報の提供について](/外国にある事業者への情報の提供について)"
+            "　｜　[プライバシーポリシー](/プライバシーポリシー)",
+            unsafe_allow_html=False,
+        )
+
+        agreed = st.checkbox(
+            "上記およびプライバシーポリシー・外国にある事業者への情報の提供についてを確認し、"
+            "外国にある事業者への情報の提供に同意します",
+            key="consent_checkbox",
+        )
+
+        col1, col2 = st.columns(2)
+        if col1.button("同意して利用を開始する", use_container_width=True, type="primary"):
+            if agreed:
+                save_consent(_user_email_early, CONSENT_VERSION)
+                st.session_state.consent_verified = True
+                st.rerun()
+            else:
+                st.error("チェックボックスにチェックを入れてから進んでください。")
+
+        if col2.button("同意しない", use_container_width=True):
+            st.logout()
+
+        st.markdown(
+            "<div style='text-align:center; margin-top:20px; font-size:11px; color:#c4a0b0;'>"
+            "同意しない場合は本サービスをご利用いただけません。<br>"
+            "退会・同意の撤回は info@recolor-inc.net までご連絡ください。</div>",
+            unsafe_allow_html=True,
+        )
+        st.stop()
+
+    # ─── スタイル ───────────────────────────────────────────────
     st.markdown("""
-    <div class="consent-warn">
-        ℹ️ Anthropic・Supabase はいずれも米国の企業です。米国には日本の個人情報保護法に相当する包括的な連邦法がないため、データの取り扱いが日本と異なる場合があります。詳細は「外国にある事業者への情報の提供について」をご確認いただけます。<br><br>
-        健康状態・病歴・性的指向などセンシティブな情報を入力する際は、ご留意ください。
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown(
-        "詳細：[外国にある事業者への情報の提供について](/外国にある事業者への情報の提供について)"
-        "　｜　[プライバシーポリシー](/プライバシーポリシー)",
-        unsafe_allow_html=False,
-    )
-
-    agreed = st.checkbox(
-        "上記およびプライバシーポリシー・外国にある事業者への情報の提供についてを確認し、"
-        "外国にある事業者への情報の提供に同意します",
-        key="consent_checkbox",
-    )
-
-    col1, col2 = st.columns(2)
-    if col1.button("同意して利用を開始する", use_container_width=True, type="primary"):
-        if agreed:
-            save_consent(_user_email_early, CONSENT_VERSION)
-            st.session_state.consent_verified = True
-            st.rerun()
-        else:
-            st.error("チェックボックスにチェックを入れてから進んでください。")
-
-    if col2.button("同意しない", use_container_width=True):
-        st.logout()
-
-    st.markdown(
-        "<div style='text-align:center; margin-top:20px; font-size:11px; color:#c4a0b0;'>"
-        "同意しない場合は本サービスをご利用いただけません。<br>"
-        "退会・同意の撤回は info@recolor-inc.net までご連絡ください。</div>",
-        unsafe_allow_html=True,
-    )
-    st.stop()
-
-# ─── スタイル ───────────────────────────────────────────────
-st.markdown("""
 <style>
-/* ページ背景 */
 [data-testid="stAppViewContainer"] {
     background: linear-gradient(160deg, #fff0f4 0%, #fde8f0 100%);
     min-height: 100vh;
 }
 [data-testid="stHeader"] { background: transparent; }
 
-/* ヘッダー */
 .chat-header {
     background: linear-gradient(135deg, #d63d6e 0%, #e8547a 60%, #f07095 100%);
     border-radius: 20px 20px 0 0;
@@ -231,7 +248,6 @@ st.markdown("""
     flex-shrink: 0;
 }
 
-/* チャットエリア全体 */
 .chat-body {
     background: white;
     border-radius: 0 0 20px 20px;
@@ -240,7 +256,6 @@ st.markdown("""
     box-shadow: 0 4px 24px rgba(214,61,110,0.10);
 }
 
-/* AIメッセージバブル */
 .msg-row-ai {
     display: flex;
     align-items: flex-end;
@@ -269,7 +284,6 @@ st.markdown("""
     box-shadow: 0 2px 8px rgba(214,61,110,0.08);
 }
 
-/* ユーザーメッセージバブル */
 .msg-row-user {
     display: flex;
     justify-content: flex-end;
@@ -287,7 +301,6 @@ st.markdown("""
     box-shadow: 0 2px 10px rgba(214,61,110,0.30);
 }
 
-/* 日付ラベル */
 .date-label {
     text-align: center;
     color: #c4a0b0;
@@ -296,7 +309,6 @@ st.markdown("""
     letter-spacing: 0.05em;
 }
 
-/* クイックチップボタン */
 .stButton > button {
     background: white !important;
     border: 1.5px solid #f0a8c0 !important;
@@ -317,7 +329,6 @@ st.markdown("""
     box-shadow: 0 3px 8px rgba(214,61,110,0.15) !important;
 }
 
-/* チャット入力欄 */
 [data-testid="stChatInput"] > div {
     border: 1.5px solid #f0a8c0 !important;
     border-radius: 24px !important;
@@ -325,74 +336,49 @@ st.markdown("""
     box-shadow: 0 2px 10px rgba(214,61,110,0.10) !important;
 }
 
-/* メインコンテンツの幅調整 */
 .block-container {
     max-width: 520px !important;
     padding-top: 1.5rem !important;
     padding-bottom: 1rem !important;
 }
 
-/* Streamlitデフォルトのチャットバブルを非表示 */
 [data-testid="stChatMessage"] {
     display: none !important;
 }
 </style>
 """, unsafe_allow_html=True)
 
+    # ─── セッション初期化（過去履歴をロード）────────────────────────
+    _user_email = _user_email_early
 
-# ─── 定数 ─────────────────────────────────────────────────
-GREETING = (
-    "こんにちは😊 リカラーAIサポートです。\n\n"
-    "卒業後のお付き合いで、うれしいことも、ちょっとモヤっとすることも、"
-    "どんなことでも気軽に話しかけてみてください。一緒に考えさせていただきますね💕"
-)
+    if "history_loaded" not in st.session_state:
+        past = load_history(_user_email)
+        st.session_state.messages = past
+        if past:
+            st.session_state.display_messages = list(past)
+        else:
+            st.session_state.display_messages = [
+                {"role": "assistant", "content": GREETING}
+            ]
+        st.session_state.history_loaded = True
 
-QUICK_CHIPS = [
-    ("🌙 返信が遅くて不安", "返信が遅くて不安です。どうしたらいいですか？"),
-    ("📅 会う頻度が減った", "最近会う頻度が減ってきていて心配です"),
-    ("💍 結婚を迷っている", "結婚のことで迷っていて、気持ちを整理したいです"),
-    ("😶 気持ちが言えない", "自分の気持ちをうまく伝えられなくて困っています"),
-]
+    if "pending_user_input" not in st.session_state:
+        st.session_state.pending_user_input = None
+    if "user_message_count" not in st.session_state:
+        st.session_state.user_message_count = 0
 
-TODAY = "今日"
+    # ─── ユーザーバー（ログアウト） ──────────────────────────────
+    _user_name = st.user.name or st.user.email or "ゲスト"
+    _col_name, _col_logout = st.columns([4, 1])
+    _col_name.markdown(
+        f"<div style='font-size:12px; color:#c4a0b0; padding-top:6px;'>👤 {_user_name}</div>",
+        unsafe_allow_html=True,
+    )
+    if _col_logout.button("ログアウト", key="_logout"):
+        st.logout()
 
-
-# ─── 定数（レート制限） ─────────────────────────────────────
-MAX_MESSAGES_PER_SESSION = 20  # 1セッションあたりの最大ユーザー送信数
-
-# ─── セッション初期化（過去履歴をロード）────────────────────────
-_user_email = _user_email_early
-
-if "history_loaded" not in st.session_state:
-    past = load_history(_user_email)
-    st.session_state.messages = past                   # API送信用
-    # 表示用：過去履歴があれば冒頭に挨拶は入れない
-    if past:
-        st.session_state.display_messages = list(past)
-    else:
-        st.session_state.display_messages = [
-            {"role": "assistant", "content": GREETING}
-        ]
-    st.session_state.history_loaded = True
-
-if "pending_user_input" not in st.session_state:
-    st.session_state.pending_user_input = None
-if "user_message_count" not in st.session_state:
-    st.session_state.user_message_count = 0
-
-
-# ─── ユーザーバー（ログアウト） ──────────────────────────────
-_user_name = st.user.name or st.user.email or "ゲスト"
-_col_name, _col_logout = st.columns([4, 1])
-_col_name.markdown(
-    f"<div style='font-size:12px; color:#c4a0b0; padding-top:6px;'>👤 {_user_name}</div>",
-    unsafe_allow_html=True,
-)
-if _col_logout.button("ログアウト", key="_logout"):
-    st.logout()
-
-# ─── ヘッダー ─────────────────────────────────────────────
-st.markdown("""
+    # ─── ヘッダー ─────────────────────────────────────────────
+    st.markdown("""
 <div class="chat-header">
     <div class="header-icon">🌸</div>
     <div>
@@ -403,79 +389,73 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+    # ─── チャット本体（HTMLで描画）────────────────────────────────
+    chat_html = ['<div class="chat-body">']
+    chat_html.append(f'<div class="date-label">{TODAY}</div>')
 
-# ─── チャット本体（HTMLで描画）────────────────────────────────
-chat_html = ['<div class="chat-body">']
-chat_html.append(f'<div class="date-label">{TODAY}</div>')
-
-for msg in st.session_state.display_messages:
-    content_escaped = (
-        msg["content"]
-        .replace("&", "&amp;")
-        .replace("<", "&lt;")
-        .replace(">", "&gt;")
-    )
-    if msg["role"] == "assistant":
-        chat_html.append(f"""
+    for msg in st.session_state.display_messages:
+        content_escaped = (
+            msg["content"]
+            .replace("&", "&amp;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+        )
+        if msg["role"] == "assistant":
+            chat_html.append(f"""
 <div class="msg-row-ai">
     <div class="ai-avatar">🌸</div>
     <div class="bubble-ai">{content_escaped}</div>
 </div>""")
-    else:
-        chat_html.append(f"""
+        else:
+            chat_html.append(f"""
 <div class="msg-row-user">
     <div class="bubble-user">{content_escaped}</div>
 </div>""")
 
-chat_html.append("</div>")
-st.markdown("\n".join(chat_html), unsafe_allow_html=True)
+    chat_html.append("</div>")
+    st.markdown("\n".join(chat_html), unsafe_allow_html=True)
 
+    # ─── クイックチップ（最初のユーザー発言前のみ表示）──────────────
+    user_spoke = any(m["role"] == "user" for m in st.session_state.display_messages)
+    if not user_spoke:
+        col1, col2 = st.columns(2)
+        for i, (label, msg_text) in enumerate(QUICK_CHIPS):
+            col = col1 if i % 2 == 0 else col2
+            if col.button(label, key=f"chip_{i}"):
+                st.session_state.pending_user_input = msg_text
+                st.rerun()
 
-# ─── クイックチップ（最初のユーザー発言前のみ表示）──────────────
-user_spoke = any(m["role"] == "user" for m in st.session_state.display_messages)
-if not user_spoke:
-    col1, col2 = st.columns(2)
-    for i, (label, msg_text) in enumerate(QUICK_CHIPS):
-        col = col1 if i % 2 == 0 else col2
-        if col.button(label, key=f"chip_{i}"):
-            st.session_state.pending_user_input = msg_text
-            st.rerun()
+    # ─── レート制限チェック ────────────────────────────────────
+    def is_rate_limited() -> bool:
+        return st.session_state.user_message_count >= MAX_MESSAGES_PER_SESSION
 
+    # ─── メッセージ処理 ────────────────────────────────────────
+    def process_user_message(user_text: str):
+        st.session_state.display_messages.append({"role": "user", "content": user_text})
+        st.session_state.messages.append({"role": "user", "content": user_text})
+        st.session_state.user_message_count += 1
+        save_message(_user_email, "user", user_text)
 
-# ─── レート制限チェック ────────────────────────────────────
-def is_rate_limited() -> bool:
-    return st.session_state.user_message_count >= MAX_MESSAGES_PER_SESSION
+        try:
+            reply, _ = chat_reply(st.session_state.messages)
+        except Exception as e:
+            reply = f"申し訳ありません、エラーが発生しました。もう一度お試しください。\n（{e}）"
 
+        st.session_state.display_messages.append({"role": "assistant", "content": reply})
+        st.session_state.messages.append({"role": "assistant", "content": reply})
+        save_message(_user_email, "assistant", reply)
 
-# ─── メッセージ処理 ────────────────────────────────────────
-def process_user_message(user_text: str):
-    st.session_state.display_messages.append({"role": "user", "content": user_text})
-    st.session_state.messages.append({"role": "user", "content": user_text})
-    st.session_state.user_message_count += 1
-    save_message(_user_email, "user", user_text)
+    # チップクリックの処理
+    if st.session_state.pending_user_input:
+        if not is_rate_limited():
+            with st.spinner(""):
+                process_user_message(st.session_state.pending_user_input)
+        st.session_state.pending_user_input = None
+        st.rerun()
 
-    try:
-        reply, _ = chat_reply(st.session_state.messages)
-    except Exception as e:
-        reply = f"申し訳ありません、エラーが発生しました。もう一度お試しください。\n（{e}）"
-
-    st.session_state.display_messages.append({"role": "assistant", "content": reply})
-    st.session_state.messages.append({"role": "assistant", "content": reply})
-    save_message(_user_email, "assistant", reply)
-
-
-# チップクリックの処理
-if st.session_state.pending_user_input:
-    if not is_rate_limited():
-        with st.spinner(""):
-            process_user_message(st.session_state.pending_user_input)
-    st.session_state.pending_user_input = None
-    st.rerun()
-
-
-# ─── テキスト入力 ──────────────────────────────────────────
-if is_rate_limited():
-    st.markdown("""
+    # ─── テキスト入力 ──────────────────────────────────────────
+    if is_rate_limited():
+        st.markdown("""
     <div style='text-align:center; padding:16px; background:#fff0f4;
                 border:1px solid #f5c6d8; border-radius:12px;
                 color:#7a2040; font-size:13px; margin-top:8px;'>
@@ -483,15 +463,15 @@ if is_rate_limited():
         続きは画面を更新してからまた話しかけてください🌸
     </div>
     """, unsafe_allow_html=True)
-else:
-    user_input = st.chat_input("気になることを話してみてください…")
-    if user_input and user_input.strip():
-        with st.spinner(""):
-            process_user_message(user_input.strip())
-        st.rerun()
+    else:
+        user_input = st.chat_input("気になることを話してみてください…")
+        if user_input and user_input.strip():
+            with st.spinner(""):
+                process_user_message(user_input.strip())
+            st.rerun()
 
-# ─── フッター ──────────────────────────────────────────────
-st.markdown("""
+    # ─── フッター ──────────────────────────────────────────────
+    st.markdown("""
 <div style='text-align:center; margin-top:16px; font-size:11px; color:#c4a0b0;'>
     © 2026 株式会社リカラー ｜
     <a href='/プライバシーポリシー' target='_self' style='color:#c4a0b0;'>プライバシーポリシー</a> ｜
@@ -499,3 +479,20 @@ st.markdown("""
     <a href='/特定商取引法に基づく表示' target='_self' style='color:#c4a0b0;'>特定商取引法に基づく表示</a>
 </div>
 """, unsafe_allow_html=True)
+
+
+# ─── ナビゲーション定義（サイドバーに表示するページを制御）──────────
+pg = st.navigation(
+    [
+        st.Page(_chat_page, default=True, url_path=""),
+        st.Page("app/pages/1_プライバシーポリシー.py", title="プライバシーポリシー"),
+        st.Page("app/pages/2_利用規約.py", title="利用規約"),
+        st.Page("app/pages/3_特定商取引法に基づく表示.py", title="特定商取引法に基づく表示"),
+        st.Page(
+            "app/pages/_外国にある事業者への情報の提供について.py",
+            title="外国にある事業者への情報の提供について",
+            hidden=True,
+        ),
+    ]
+)
+pg.run()
