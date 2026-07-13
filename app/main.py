@@ -484,11 +484,11 @@ def _chat_page():
 pg = st.navigation(
     [
         st.Page(_chat_page, default=True, url_path=""),
-        st.Page("app/pages/1_プライバシーポリシー.py", title="プライバシーポリシー"),
-        st.Page("app/pages/2_利用規約.py", title="利用規約"),
-        st.Page("app/pages/3_特定商取引法に基づく表示.py", title="特定商取引法に基づく表示"),
+        st.Page("pages/1_プライバシーポリシー.py", title="プライバシーポリシー"),
+        st.Page("pages/2_利用規約.py", title="利用規約"),
+        st.Page("pages/3_特定商取引法に基づく表示.py", title="特定商取引法に基づく表示"),
         st.Page(
-            "app/pages/_外国にある事業者への情報の提供について.py",
+            "pages/_外国にある事業者への情報の提供について.py",
             title="外国にある事業者への情報の提供について",
             hidden=True,
         ),
