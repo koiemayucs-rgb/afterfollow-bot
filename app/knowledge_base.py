@@ -6,6 +6,7 @@ from app.config import CSV_PATH
 TXT_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "recolor_method.txt")
 SRANK_TXT_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "srank_mindset.txt")
 CLIENT_DATA_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "client_data.csv")
+SEX_FAQ_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "sex_relationship_faq.txt")
 
 
 def _summarize_client_data() -> str:
@@ -101,6 +102,11 @@ def load_knowledge_base() -> str:
     client_summary = _summarize_client_data()
     if client_summary:
         parts.append(client_summary)
+
+    # セックス・パートナーシップ Q&A
+    if os.path.exists(SEX_FAQ_PATH):
+        with open(SEX_FAQ_PATH, encoding="utf-8") as f:
+            parts.append(f.read())
 
     # 相談事例集（CSVファイル）
     if os.path.exists(CSV_PATH):
