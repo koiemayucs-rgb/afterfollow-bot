@@ -395,6 +395,7 @@ st.markdown("""
 <div style='text-align:center; margin-top:16px; font-size:11px; color:#c4a0b0;'>
     © 2026 株式会社リカラー ｜
     <a href='/プライバシーポリシー' target='_self' style='color:#c4a0b0;'>プライバシーポリシー</a> ｜
-    <a href='/利用規約' target='_self' style='color:#c4a0b0;'>利用規約・特定商取引法に基づく表示</a>
+    <a href='/利用規約' target='_self' style='color:#c4a0b0;'>利用規約</a> ｜
+    <a href='/特定商取引法に基づく表示' target='_self' style='color:#c4a0b0;'>特定商取引法に基づく表示</a>
 </div>
 """, unsafe_allow_html=True)
