@@ -1,6 +1,8 @@
 import streamlit as st
 from supabase import create_client, Client
 
+CONSENT_VERSION = "1.0"
+
 
 def _get_config() -> tuple[str, str]:
     """Streamlit Secrets → 環境変数の順で URL と Key を取得する。"""
@@ -57,3 +59,37 @@ def load_history(user_email: str) -> list[dict]:
         return [{"role": r["role"], "content": r["content"]} for r in rows]
     except Exception:
         return []
+
+
+def has_consented(user_email: str, version: str = CONSENT_VERSION) -> bool:
+    """指定バージョンへの同意済みかどうかを確認する。"""
+    url, key = _get_config()
+    if not url or not key:
+        return False
+    try:
+        res = (
+            _get_client()
+            .table("consents")
+            .select("id")
+            .eq("user_email", user_email)
+            .eq("consent_version", version)
+            .limit(1)
+            .execute()
+        )
+        return len(res.data) > 0
+    except Exception:
+        return False
+
+
+def save_consent(user_email: str, version: str = CONSENT_VERSION) -> None:
+    """ユーザーの同意記録をSupabaseに保存する。"""
+    url, key = _get_config()
+    if not url or not key:
+        return
+    try:
+        _get_client().table("consents").upsert(
+            {"user_email": user_email, "consent_version": version},
+            on_conflict="user_email,consent_version",
+        ).execute()
+    except Exception:
+        pass

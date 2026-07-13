@@ -3,7 +3,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import streamlit as st
 from app.claude_client import chat_reply
-from app.db import load_history, save_message
+from app.db import load_history, save_message, has_consented, save_consent, CONSENT_VERSION
 
 st.set_page_config(
     page_title="ReColor AI サポート",
@@ -80,6 +80,105 @@ if not st.user.is_logged_in:
         <a href='/利用規約' target='_self' style='color:#c4a0b0;'>利用規約</a>
     </div>
     """, unsafe_allow_html=True)
+    st.stop()
+
+# ─── 同意ゲート ────────────────────────────────────────────
+_user_email_early = st.user.email or ""
+
+if "consent_verified" not in st.session_state:
+    st.session_state.consent_verified = has_consented(_user_email_early, CONSENT_VERSION)
+
+if not st.session_state.consent_verified:
+    st.markdown("""
+    <style>
+    [data-testid="stAppViewContainer"] {
+        background: linear-gradient(160deg, #fff0f4 0%, #fde8f0 100%);
+        min-height: 100vh;
+    }
+    [data-testid="stHeader"] { background: transparent; }
+    .block-container { max-width: 640px !important; padding-top: 2.5rem !important; }
+    .consent-card {
+        background: white;
+        border-radius: 20px;
+        padding: 32px 28px 24px;
+        box-shadow: 0 8px 32px rgba(214,61,110,0.15);
+    }
+    .consent-title {
+        color: #d63d6e;
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 16px;
+        text-align: center;
+    }
+    .consent-body {
+        color: #5a3040;
+        font-size: 13.5px;
+        line-height: 1.8;
+    }
+    .consent-warn {
+        background: #fff8f0;
+        border-left: 3px solid #e89040;
+        padding: 10px 14px;
+        border-radius: 4px;
+        margin: 14px 0;
+        font-size: 12.5px;
+        color: #7a4010;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
+    <div class="consent-card">
+        <div class="consent-title">🌸 ご利用前にご確認ください</div>
+        <div class="consent-body">
+            本サービスをご利用いただくにあたり、以下の外国にある事業者へ個人情報を提供します。
+            <br><br>
+            <b>・Anthropic, Inc.（米国）</b><br>
+            　AIによる返答生成のため、会話テキストを送信します。<br><br>
+            <b>・Supabase, Inc.（米国）</b><br>
+            　会話履歴の保存のため、メールアドレスおよび会話テキストを送信します。<br>
+            　なお、データの保存先は東京リージョン（日本国内）です。
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
+    <div class="consent-warn">
+        ⚠️ 米国には日本の個人情報保護法に相当する包括的な連邦法がなく、日本と同等の保護措置が取られない場合があります。詳しくは下記「外国にある事業者への情報の提供について」をご確認ください。<br><br>
+        また、会話内容に要配慮個人情報（健康・病歴・性的指向等）を含む場合は、特にご注意ください。
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown(
+        "詳細：[外国にある事業者への情報の提供について](/外国にある事業者への情報の提供について)"
+        "　｜　[プライバシーポリシー](/プライバシーポリシー)",
+        unsafe_allow_html=False,
+    )
+
+    agreed = st.checkbox(
+        "上記およびプライバシーポリシー・外国にある事業者への情報の提供についてを確認し、"
+        "外国にある事業者への情報の提供に同意します",
+        key="consent_checkbox",
+    )
+
+    col1, col2 = st.columns(2)
+    if col1.button("同意して利用を開始する", use_container_width=True, type="primary"):
+        if agreed:
+            save_consent(_user_email_early, CONSENT_VERSION)
+            st.session_state.consent_verified = True
+            st.rerun()
+        else:
+            st.error("チェックボックスにチェックを入れてから進んでください。")
+
+    if col2.button("同意しない", use_container_width=True):
+        st.logout()
+
+    st.markdown(
+        "<div style='text-align:center; margin-top:20px; font-size:11px; color:#c4a0b0;'>"
+        "同意しない場合は本サービスをご利用いただけません。<br>"
+        "退会・同意の撤回は info@recolor-inc.net までご連絡ください。</div>",
+        unsafe_allow_html=True,
+    )
     st.stop()
 
 # ─── スタイル ───────────────────────────────────────────────
@@ -261,7 +360,7 @@ TODAY = "今日"
 MAX_MESSAGES_PER_SESSION = 20  # 1セッションあたりの最大ユーザー送信数
 
 # ─── セッション初期化（過去履歴をロード）────────────────────────
-_user_email = st.user.email or ""
+_user_email = _user_email_early
 
 if "history_loaded" not in st.session_state:
     past = load_history(_user_email)
