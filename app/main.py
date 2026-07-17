@@ -203,6 +203,11 @@ def _chat_page():
     # ─── スタイル ───────────────────────────────────────────────
     st.markdown("""
 <style>
+/* ダークモード無効化：システムの配色設定に関わらず常にライトモードで表示 */
+:root, html, body {
+    color-scheme: light !important;
+}
+
 [data-testid="stAppViewContainer"] {
     background: linear-gradient(160deg, #fff0f4 0%, #fde8f0 100%);
     min-height: 100vh;
@@ -333,6 +338,14 @@ def _chat_page():
     border-radius: 24px !important;
     background: white !important;
     box-shadow: 0 2px 10px rgba(214,61,110,0.10) !important;
+}
+[data-testid="stChatInput"] textarea {
+    color: #333333 !important;
+    background: white !important;
+    caret-color: #d63d6e !important;
+}
+[data-testid="stChatInput"] textarea::placeholder {
+    color: #c4a0b0 !important;
 }
 
 .block-container {
